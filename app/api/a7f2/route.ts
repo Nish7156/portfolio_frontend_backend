@@ -150,7 +150,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, message: "OTP sent" });
   } catch (e) {
-    console.error(e);
+    console.error("a7f2 error:", e);
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes("MONGODB_URI") || msg.includes("ENOTFOUND") || msg.includes("MongoServerSelectionError") || msg.includes("timed out")) {
+      return NextResponse.json(
+        { error: "Database unavailable. Check MONGODB_URI and Atlas Network Access (whitelist 0.0.0.0/0)." },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }
