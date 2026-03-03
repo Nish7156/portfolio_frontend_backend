@@ -82,10 +82,11 @@ export default function AdminPage() {
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [loadingActions, setLoadingActions] = useState(false);
 
-  const adminHeaders = useCallback(
-    () => (isKeyLikelyValid(key) ? { "x-admin-key": key } : {}),
-    [key]
-  );
+  const adminHeaders = useCallback((): Record<string, string> => {
+    const h: Record<string, string> = {};
+    if (isKeyLikelyValid(key)) h["x-admin-key"] = key;
+    return h;
+  }, [key]);
 
   const logAdminAction = useCallback(
     async (action: string, meta?: Record<string, unknown>) => {
