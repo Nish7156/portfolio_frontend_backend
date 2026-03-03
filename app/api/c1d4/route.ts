@@ -47,6 +47,9 @@ export async function POST(request: NextRequest) {
     if (!name?.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
+    if (!email?.trim()) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    }
     if (!resumeBase64 || !resumeFileName) {
       return NextResponse.json({ error: "Resume (PDF) is required" }, { status: 400 });
     }
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
     const doc = {
       userId: new ObjectId(userId),
       name: String(name).trim(),
-      email: email ? String(email).trim() : null,
+      email: String(email).trim(),
       collegeName: collegeName ? String(collegeName).trim() : null,
       resumeBase64: rawBase64,
       resumeFileName,

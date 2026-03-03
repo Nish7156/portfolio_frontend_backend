@@ -40,23 +40,26 @@ export async function POST(request: NextRequest) {
       );
     } catch {}
 
-    const cutoff = new Date(Date.now() - OTP_VERIFY_LOCKOUT_MS);
-    const recentFails = await db
-      .collection("verify_attempts")
-      .countDocuments({
-        $or: [{ phone: cleanPhone }, { ip: clientIP }],
-        success: false,
-        createdAt: { $gte: cutoff },
-      });
-    if (recentFails >= OTP_MAX_VERIFY_ATTEMPTS) {
-      const waitMin = Math.ceil(OTP_VERIFY_LOCKOUT_MS / 60000);
-      return NextResponse.json(
-        { error: `Too many attempts. Wait ${waitMin} minutes.` },
-        { status: 429, headers: { "Retry-After": String(Math.ceil(OTP_VERIFY_LOCKOUT_MS / 1000)) } }
-      );
+    const isDev = process.env.NODE_ENV === "development";
+    if (!isDev) {
+      const cutoff = new Date(Date.now() - OTP_VERIFY_LOCKOUT_MS);
+      const recentFails = await db
+        .collection("verify_attempts")
+        .countDocuments({
+          $or: [{ phone: cleanPhone }, { ip: clientIP }],
+          success: false,
+          createdAt: { $gte: cutoff },
+        });
+      if (recentFails >= OTP_MAX_VERIFY_ATTEMPTS) {
+        const waitMin = Math.ceil(OTP_VERIFY_LOCKOUT_MS / 60000);
+        return NextResponse.json(
+          { error: `Too many attempts. Wait ${waitMin} minutes.` },
+          { status: 429, headers: { "Retry-After": String(Math.ceil(OTP_VERIFY_LOCKOUT_MS / 1000)) } }
+        );
+      }
     }
-
-    const otpHash = hashOTP(String(otp));
+    const otpStr = String(otp).trim();
+    const otpHash = isDev && otpStr === "111111" ? hashOTP("111111") : hashOTP(otpStr);
     const record = await db
       .collection("otps")
       .findOne({ phone: cleanPhone, otpHash });

@@ -10,7 +10,7 @@ function getClientIP(request: NextRequest): string {
   return "unknown";
 }
 
-const VALID_PAGES = ["/", "/register", "/portfolio/create", "/portfolio/pay", "/success"];
+const VALID_PAGES = ["/", "/register", "/portfolio/create", "/portfolio/pay", "/success", "/profile"];
 
 export async function POST(request: NextRequest) {
   try {

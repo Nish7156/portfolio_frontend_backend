@@ -41,7 +41,7 @@ export default function RegisterPage() {
           return;
         }
         if (d.portfolio.paymentStatus === "completed") {
-          router.replace("/success");
+          router.replace("/profile");
           return;
         }
         router.replace("/portfolio/pay");

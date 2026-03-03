@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       });
       if (e.timeSpentMs) s.totalTimeMs += e.timeSpentMs;
       if (e.action === "page_leave" && e.step != null && s.lastStep == null) s.lastStep = `${e.page}#${e.step}`;
-      if (e.page === "/success") s.completed = true;
+      if (e.page === "/success" || e.page === "/profile") s.completed = true;
     }
 
     const userIds = [...new Set(events.map((e) => e.userId).filter(Boolean))] as string[];

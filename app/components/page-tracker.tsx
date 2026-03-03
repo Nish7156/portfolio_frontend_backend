@@ -9,6 +9,7 @@ const PAGE_STEP: Record<string, number> = {
   "/portfolio/create": 2,
   "/portfolio/pay": 3,
   "/success": 4,
+  "/profile": 4,
 };
 
 export function PageTracker() {

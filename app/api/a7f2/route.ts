@@ -55,57 +55,60 @@ export async function POST(request: NextRequest) {
       );
     } catch {}
 
+    const isDev = process.env.NODE_ENV === "development";
     const now = Date.now();
-    const cooldownCutoff = new Date(now - OTP_COOLDOWN_MS);
-    const dailyCutoff = new Date(now - 24 * 60 * 60 * 1000);
 
-    const recentByPhone = await db.collection("otp_rate_limits").findOne(
-      { phone: cleanPhone, sentAt: { $gte: cooldownCutoff } },
-      { sort: { sentAt: -1 } }
-    );
-    if (recentByPhone) {
-      const waitMs = recentByPhone.sentAt.getTime() + OTP_COOLDOWN_MS - now;
-      return NextResponse.json(
-        { error: `Please wait ${Math.ceil(waitMs / 60000)} minutes before requesting another OTP.` },
-        { status: 429, headers: retryAfter(waitMs) }
+    if (!isDev) {
+      const cooldownCutoff = new Date(now - OTP_COOLDOWN_MS);
+      const dailyCutoff = new Date(now - 24 * 60 * 60 * 1000);
+
+      const recentByPhone = await db.collection("otp_rate_limits").findOne(
+        { phone: cleanPhone, sentAt: { $gte: cooldownCutoff } },
+        { sort: { sentAt: -1 } }
       );
-    }
+      if (recentByPhone) {
+        const waitMs = recentByPhone.sentAt.getTime() + OTP_COOLDOWN_MS - now;
+        return NextResponse.json(
+          { error: `Please wait ${Math.ceil(waitMs / 60000)} minutes before requesting another OTP.` },
+          { status: 429, headers: retryAfter(waitMs) }
+        );
+      }
 
-    const dailyByPhone = await db.collection("otp_rate_limits").countDocuments({
-      phone: cleanPhone,
-      sentAt: { $gte: dailyCutoff },
-    });
-    if (dailyByPhone >= OTP_DAILY_LIMIT_PER_PHONE) {
-      return NextResponse.json(
-        { error: "Daily OTP limit reached for this number. Try again tomorrow." },
-        { status: 429 }
+      const dailyByPhone = await db.collection("otp_rate_limits").countDocuments({
+        phone: cleanPhone,
+        sentAt: { $gte: dailyCutoff },
+      });
+      if (dailyByPhone >= OTP_DAILY_LIMIT_PER_PHONE) {
+        return NextResponse.json(
+          { error: "Daily OTP limit reached for this number. Try again tomorrow." },
+          { status: 429 }
+        );
+      }
+
+      const recentByIP = await db.collection("otp_rate_limits").findOne(
+        { ip: clientIP, sentAt: { $gte: cooldownCutoff } },
+        { sort: { sentAt: -1 } }
       );
-    }
+      if (recentByIP) {
+        const waitMs = recentByIP.sentAt.getTime() + OTP_COOLDOWN_MS - now;
+        return NextResponse.json(
+          { error: `Too many requests. Try again in ${Math.ceil(waitMs / 60000)} minutes.` },
+          { status: 429, headers: retryAfter(waitMs) }
+        );
+      }
 
-    const recentByIP = await db.collection("otp_rate_limits").findOne(
-      { ip: clientIP, sentAt: { $gte: cooldownCutoff } },
-      { sort: { sentAt: -1 } }
-    );
-    if (recentByIP) {
-      const waitMs = recentByIP.sentAt.getTime() + OTP_COOLDOWN_MS - now;
-      return NextResponse.json(
-        { error: `Too many requests. Try again in ${Math.ceil(waitMs / 60000)} minutes.` },
-        { status: 429, headers: retryAfter(waitMs) }
-      );
+      const dailyByIP = await db.collection("otp_rate_limits").countDocuments({
+        ip: clientIP,
+        sentAt: { $gte: dailyCutoff },
+      });
+      if (dailyByIP >= OTP_DAILY_LIMIT_PER_IP) {
+        return NextResponse.json(
+          { error: "Too many OTP requests from your network. Try again tomorrow." },
+          { status: 429 }
+        );
+      }
     }
-
-    const dailyByIP = await db.collection("otp_rate_limits").countDocuments({
-      ip: clientIP,
-      sentAt: { $gte: dailyCutoff },
-    });
-    if (dailyByIP >= OTP_DAILY_LIMIT_PER_IP) {
-      return NextResponse.json(
-        { error: "Too many OTP requests from your network. Try again tomorrow." },
-        { status: 429 }
-      );
-    }
-
-    const otp = generateOTP();
+    const otp = isDev ? "111111" : generateOTP();
     const expiresAt = new Date(now + OTP_VALIDITY_MS);
 
     await db.collection("otps").deleteMany({ phone: cleanPhone });
@@ -116,39 +119,43 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
     });
 
-    const fast2smsKey = process.env.FAST2SMS_API_KEY;
-    if (!fast2smsKey) {
-      return NextResponse.json({ error: "OTP service unavailable" }, { status: 503 });
-    }
+    if (!isDev) {
+      const fast2smsKey = process.env.FAST2SMS_API_KEY;
+      if (!fast2smsKey) {
+        return NextResponse.json({ error: "OTP service unavailable" }, { status: 503 });
+      }
 
-    const body = {
-      route: "q",
-      message: `Your verification code: ${otp}. Valid for 5 minutes.
+      const body = {
+        route: "q",
+        message: `Your verification code: ${otp}. Valid for 5 minutes.
 
 From Web Triggers`,
-      numbers: cleanPhone,
-      flash: "0",
-    };
-    const res = await fetch(FAST2SMS_URL, {
-      method: "POST",
-      headers: {
-        authorization: fast2smsKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || (data.return === false && data.message)) {
-      await db.collection("otps").deleteMany({ phone: cleanPhone });
-      console.error("Fast2SMS failed");
-      return NextResponse.json({ error: "Please try again later." }, { status: 500 });
+        numbers: cleanPhone,
+        flash: "0",
+      };
+      const res = await fetch(FAST2SMS_URL, {
+        method: "POST",
+        headers: {
+          authorization: fast2smsKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || (data.return === false && data.message)) {
+        await db.collection("otps").deleteMany({ phone: cleanPhone });
+        console.error("Fast2SMS failed");
+        return NextResponse.json({ error: "Please try again later." }, { status: 500 });
+      }
     }
 
-    await db.collection("otp_rate_limits").insertOne({
-      phone: cleanPhone,
-      ip: clientIP,
-      sentAt: new Date(),
-    });
+    if (!isDev) {
+      await db.collection("otp_rate_limits").insertOne({
+        phone: cleanPhone,
+        ip: clientIP,
+        sentAt: new Date(),
+      });
+    }
 
     return NextResponse.json({ success: true, message: "OTP sent" });
   } catch (e) {

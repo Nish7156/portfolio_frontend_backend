@@ -51,7 +51,7 @@ export default function CreatePortfolioPage() {
       .then((d) => {
         if (!d || d.error) return;
         if (d.portfolio?.paymentStatus === "completed") {
-          router.replace("/success");
+          router.replace("/profile");
           return;
         }
         if (!hasDraft && d.portfolio) {
@@ -115,6 +115,10 @@ export default function CreatePortfolioPage() {
       setError("Name is required");
       return;
     }
+    if (!email.trim()) {
+      setError("Email is required");
+      return;
+    }
     if (!resume) {
       setError("Resume (PDF) is required");
       return;
@@ -129,7 +133,7 @@ export default function CreatePortfolioPage() {
         },
         body: JSON.stringify({
           name: name.trim(),
-          email: email.trim() || undefined,
+          email: email.trim(),
           collegeName: collegeName.trim() || undefined,
           additionalDetails: additionalDetails.trim() || undefined,
           resumeBase64: resume.base64,
@@ -173,7 +177,7 @@ export default function CreatePortfolioPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Email <span className="text-slate-500">(optional)</span>
+                Email <span className="text-red-400">*</span>
               </label>
               <input
                 type="email"

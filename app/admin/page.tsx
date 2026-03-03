@@ -360,6 +360,7 @@ export default function AdminPage() {
       "/portfolio/create": "Details",
       "/portfolio/pay": "Payment",
       "/success": "Done",
+      "/profile": "Profile",
     };
     const [page, step] = lastStep.split("#");
     return m[page] || page + (step ? ` (step ${step})` : "");

@@ -6,6 +6,7 @@ import { ObjectId } from "mongodb";
 
 const BASIC_AMOUNT = 50;
 const PREMIUM_AMOUNT = 100;
+const TEST_AMOUNT = 1;
 
 export async function POST(request: NextRequest) {
   const auth = request.headers.get("authorization");
@@ -18,9 +19,10 @@ export async function POST(request: NextRequest) {
     try {
       const body = await request.json();
       if (body?.template === "premium") template = "premium";
+      else if (body?.template === "test") template = "test";
     } catch {}
 
-    const amount = template === "premium" ? PREMIUM_AMOUNT : BASIC_AMOUNT;
+    const amount = template === "premium" ? PREMIUM_AMOUNT : template === "test" ? TEST_AMOUNT : BASIC_AMOUNT;
     const amountInPaise = amount * 100;
 
     const keyId = process.env.RAZORPAY_KEY_ID;

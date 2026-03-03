@@ -33,7 +33,7 @@ export function RedirectIfLoggedIn() {
           return;
         }
         if (d.portfolio.paymentStatus === "completed") {
-          router.replace("/success");
+          router.replace("/profile");
           return;
         }
         router.replace("/portfolio/pay");

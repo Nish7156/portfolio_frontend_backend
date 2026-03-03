@@ -27,7 +27,7 @@ interface RazorpayInstance {
 }
 
 export default function PayPage() {
-  const [template, setTemplate] = useState<"basic" | "premium">("basic");
+  const [template, setTemplate] = useState<"basic" | "premium" | "test">("basic");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -36,6 +36,7 @@ export default function PayPage() {
     try {
       const s = sessionStorage.getItem(PAY_KEY);
       if (s === "premium") setTemplate("premium");
+      else if (s === "test") setTemplate("test");
     } catch {}
   }, []);
 
@@ -62,7 +63,7 @@ export default function PayPage() {
       })
       .then((d) => {
         if (d?.portfolio?.paymentStatus === "completed") {
-          router.replace("/success");
+          router.replace("/profile");
         }
       });
   }, [router]);
@@ -114,7 +115,7 @@ export default function PayPage() {
           const vData = await vRes.json();
           if (vRes.ok && vData.success) {
             try { sessionStorage.removeItem(PAY_KEY); } catch {}
-            router.push("/success");
+            router.push("/profile");
             router.refresh();
           } else {
             setError("Payment verification failed");
@@ -180,6 +181,27 @@ export default function PayPage() {
                 <span className="text-xl font-bold text-amber-400 shrink-0">₹100</span>
               </div>
             </button>
+            <button
+              onClick={() => setTemplate("test")}
+              className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                template === "test"
+                  ? "border-green-500/70 bg-green-500/10 shadow-lg shadow-green-500/10"
+                  : "border-slate-600 hover:border-slate-500 hover:bg-slate-800/30"
+              }`}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center shrink-0">
+                    <span className="text-lg">🧪</span>
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-semibold text-white block">Test (₹1)</span>
+                    <span className="text-slate-400 text-sm">Test payment — create portfolio</span>
+                  </div>
+                </div>
+                <span className="text-xl font-bold text-green-400 shrink-0">₹1</span>
+              </div>
+            </button>
           </div>
 
           {error && (
@@ -201,7 +223,7 @@ export default function PayPage() {
                 Opening payment...
               </span>
             ) : (
-              <span className="truncate">Pay ₹{template === "basic" ? "50" : "100"} & Create Portfolio</span>
+              <span className="truncate">Pay ₹{template === "basic" ? "50" : template === "premium" ? "100" : "1"} & Create Portfolio</span>
             )}
           </button>
 
