@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { RedirectIfLoggedIn } from "@/app/components/redirect-if-logged-in";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://portfoliogen.in";
@@ -47,8 +46,8 @@ export default function Home() {
       />
       <header className="sticky top-0 z-50 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur relative safe-area-top">
         <div className="mx-auto max-w-6xl px-5 sm:px-6 py-3.5 sm:py-4 flex justify-between items-center min-h-[44px] sm:min-h-0">
-          <Link href="/" className="flex items-center gap-2 py-2 -my-2 transition hover:opacity-90">
-            <Image src="/logo.png" alt="PortfolioGen" width={176} height={96} className="h-8 w-auto sm:h-9" priority />
+          <Link href="/" className="text-lg sm:text-xl font-bold text-white hover:text-indigo-400 active:text-indigo-300 transition py-2 -my-2">
+            PortfolioGen
           </Link>
         </div>
       </header>
