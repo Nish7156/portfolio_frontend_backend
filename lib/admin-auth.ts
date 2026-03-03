@@ -9,10 +9,20 @@ function getValidKeys(): string[] {
   return single ? [single] : [];
 }
 
+const ERROR_LIKE_PATTERNS = [
+  /^Error\s/i,
+  /Failed to load/i,
+  /failed to fetch/i,
+  /network error/i,
+];
+
 export function validateAdminKey(key: string | null | undefined): boolean {
-  if (!key) return false;
+  if (!key || typeof key !== "string") return false;
+  const k = key.trim();
+  if (!k) return false;
+  if (ERROR_LIKE_PATTERNS.some((p) => p.test(k))) return false;
   const valid = getValidKeys();
-  return valid.includes(key);
+  return valid.includes(k);
 }
 
 export function getAdminId(key: string): string {

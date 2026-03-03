@@ -2,6 +2,13 @@
 
 import { useState, useCallback } from "react";
 import { API } from "@/lib/api-paths";
+
+function isKeyLikelyValid(k: string): boolean {
+  const s = k?.trim() || "";
+  if (!s) return false;
+  if (/^Error\s/i.test(s) || /Failed to load/i.test(s) || /failed to fetch/i.test(s) || /network error/i.test(s)) return false;
+  return true;
+}
 import { PaginationBar } from "@/app/components/pagination-bar";
 
 const PAGE_SIZES = [5, 10, 15, 25];
@@ -76,7 +83,7 @@ export default function AdminPage() {
   const [loadingActions, setLoadingActions] = useState(false);
 
   const adminHeaders = useCallback(
-    () => ({ "x-admin-key": key }),
+    () => (isKeyLikelyValid(key) ? { "x-admin-key": key } : {}),
     [key]
   );
 

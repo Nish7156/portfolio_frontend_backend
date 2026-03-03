@@ -47,14 +47,6 @@ export const metadata: Metadata = {
     siteName: "PortfolioGen",
     title: "PortfolioGen | Resume to Portfolio in Minutes — ₹50",
     description: "Create your professional portfolio from resume. Register with OTP, add details, pay ₹50 or ₹100. Beautiful design in 6 hours. Trusted by students.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "PortfolioGen - Resume to Portfolio",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
