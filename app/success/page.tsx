@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { StepsBar } from "@/app/components/steps-bar";
 
-export const metadata = {
-  title: "Payment Success | Portfolio Generator",
-  description: "Your portfolio order is confirmed. We'll create your portfolio ASAP.",
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Payment Success",
+  description: "Your portfolio order is confirmed. We'll create your portfolio in 6 hours.",
+  robots: { index: false, follow: true },
 };
+
 
 export default function SuccessPage() {
   return (

@@ -14,42 +14,79 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://portfoliogen.in";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: {
-    default: "PortfolioGen | Resume to Portfolio in Minutes — ₹50",
+    default: "PortfolioGen | Resume to Portfolio in Minutes — ₹50 | Students & Professionals",
     template: "%s | PortfolioGen",
   },
   description:
-    "Create your professional portfolio website from your resume. Register with OTP, add details, pay ₹50 or ₹100. Get your portfolio ASAP. Trusted by students and professionals.",
+    "Create your professional portfolio website from your resume in minutes. Register with OTP, upload PDF, pay ₹50 or ₹100. Beautiful design delivered in 6 hours. Trusted by students across India for placements & internships.",
   keywords: [
     "portfolio website",
     "resume to portfolio",
-    "create portfolio",
+    "create portfolio online",
     "student portfolio",
     "professional portfolio",
     "portfolio builder India",
+    "placement portfolio",
+    "resume to website",
+    "portfolio generator",
   ],
-  authors: [{ name: "PortfolioGen" }],
+  authors: [{ name: "PortfolioGen", url: baseUrl }],
   creator: "PortfolioGen",
+  publisher: "PortfolioGen",
+  applicationName: "PortfolioGen",
+  category: "technology",
   openGraph: {
     type: "website",
-    title: "PortfolioGen | Resume to Portfolio — ₹50",
-    description: "Create your professional portfolio from resume. Register, add details, pay. Get portfolio ASAP.",
+    locale: "en_IN",
+    url: baseUrl,
+    siteName: "PortfolioGen",
+    title: "PortfolioGen | Resume to Portfolio in Minutes — ₹50",
+    description: "Create your professional portfolio from resume. Register with OTP, add details, pay ₹50 or ₹100. Beautiful design in 6 hours. Trusted by students.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "PortfolioGen - Resume to Portfolio",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PortfolioGen | Resume to Portfolio",
-    description: "Create your professional portfolio from resume. ₹50 basic, ₹100 premium.",
+    title: "PortfolioGen | Resume to Portfolio — ₹50",
+    description: "Create your professional portfolio from resume. ₹50 basic, ₹100 premium. Trusted by students.",
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: { index: true, follow: true },
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
+  alternates: {
+    canonical: baseUrl,
+  },
+  ...(process.env.GOOGLE_SITE_VERIFICATION && {
+    verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
+  }),
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#312e81",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

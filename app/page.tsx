@@ -1,17 +1,36 @@
 import Link from "next/link";
+import Image from "next/image";
 import { RedirectIfLoggedIn } from "@/app/components/redirect-if-logged-in";
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Service",
-  name: "PortfolioGen",
-  description: "Create your professional portfolio website from your resume. Beautiful design delivered in max 6 hours. Register with OTP, add details, pay ₹50 or ₹100.",
-  provider: { "@type": "Organization", name: "PortfolioGen" },
-  offers: [
-    { "@type": "Offer", price: "50", priceCurrency: "INR", name: "Basic Template" },
-    { "@type": "Offer", price: "100", priceCurrency: "INR", name: "Premium Template" },
-  ],
-};
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://portfoliogen.in";
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "PortfolioGen",
+    url: baseUrl,
+    description: "Create your professional portfolio website from your resume in minutes. ₹50 or ₹100. Delivered in 6 hours.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: `${baseUrl}/register` },
+      "query-input": "required name=search_term_string",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "PortfolioGen",
+    description: "Create your professional portfolio website from your resume. Beautiful design delivered in max 6 hours. Register with OTP, add details, pay ₹50 or ₹100.",
+    url: baseUrl,
+    provider: { "@type": "Organization", name: "PortfolioGen", url: baseUrl },
+    areaServed: { "@type": "Country", name: "India" },
+    offers: [
+      { "@type": "Offer", price: "50", priceCurrency: "INR", name: "Basic Template" },
+      { "@type": "Offer", price: "100", priceCurrency: "INR", name: "Premium Template" },
+    ],
+  },
+];
 
 export default function Home() {
   return (
@@ -28,8 +47,8 @@ export default function Home() {
       />
       <header className="sticky top-0 z-50 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur relative safe-area-top">
         <div className="mx-auto max-w-6xl px-5 sm:px-6 py-3.5 sm:py-4 flex justify-between items-center min-h-[44px] sm:min-h-0">
-          <Link href="/" className="text-lg sm:text-xl font-bold text-white hover:text-indigo-400 active:text-indigo-300 transition py-2 -my-2">
-            PortfolioGen
+          <Link href="/" className="flex items-center gap-2 py-2 -my-2 transition hover:opacity-90">
+            <Image src="/logo.png" alt="PortfolioGen" width={176} height={96} className="h-8 w-auto sm:h-9" priority />
           </Link>
         </div>
       </header>
