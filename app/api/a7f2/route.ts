@@ -123,7 +123,9 @@ export async function POST(request: NextRequest) {
 
     const body = {
       route: "q",
-      message: `Your OTP: ${otp}`,
+      message: `Your verification code: ${otp}. Valid for 5 minutes.
+
+From Web Triggers`,
       numbers: cleanPhone,
       flash: "0",
     };
