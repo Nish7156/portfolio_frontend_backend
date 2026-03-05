@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { createHash } from "crypto";
+import { createToken } from "@/lib/auth";
 import {
   OTP_COOLDOWN_MS,
   OTP_DAILY_LIMIT_PER_PHONE,
@@ -47,6 +48,20 @@ export async function POST(request: NextRequest) {
 
     const clientIP = getClientIP(request);
     const db = await connectDB();
+
+    const existingUser = await db.collection("users").findOne({ phone: cleanPhone });
+    if (existingUser) {
+      const token = await createToken({
+        phone: cleanPhone,
+        userId: String(existingUser._id),
+      });
+      return NextResponse.json({
+        success: true,
+        existingUser: true,
+        token,
+        userId: String(existingUser._id),
+      });
+    }
 
     try {
       await db.collection("otp_rate_limits").createIndex(

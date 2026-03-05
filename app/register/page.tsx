@@ -90,6 +90,15 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
+      if (data.existingUser && data.token) {
+        localStorage.setItem("portfolio_token", data.token);
+        try {
+          sessionStorage.removeItem(REGISTER_KEY);
+        } catch {}
+        router.push("/portfolio/create");
+        router.refresh();
+        return;
+      }
       setStep("otp");
       setResendIn(60);
       otpInputRef.current?.focus();
